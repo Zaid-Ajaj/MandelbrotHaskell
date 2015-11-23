@@ -1,0 +1,12 @@
+name:           Mandelbrot
+version:        1.0
+cabal-version:  >=1.2
+build-type:     Simple
+author:         Zaid
+
+executable Mandelbrot
+  hs-source-dirs:  src
+  main-is:         Main.hs
+  build-depends:   base >= 4
+  ghc-options:     -Wall
+
