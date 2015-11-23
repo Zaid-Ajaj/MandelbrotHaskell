@@ -2,33 +2,53 @@ module Main where
 
 import Control.Monad
 
-data Complex = C Float Float
-    deriving Show
-    
-data Point = Point Int Int
-data Range = Range Float Float
+data Complex = Complex Double Double
+data Point = Point Integer Integer
+data Range = Range Double Double
 
-multiply :: Complex -> Complex -> Complex
-multiply (C a b) (C c d) = C (a * c - d * b) (a * d + b * c)
+width :: Double
+width = 100.0
 
-add  :: Complex -> Complex -> Complex
-add (C x1 y1) (C x2 y2) = C (x1+x2) (y1+y2) -- just like vectors
+height :: Double
+height = 100.0
 
-magnitude :: Complex -> Float
-magnitude (C a b) = sqrt (a*a + b*b)
+xMin :: Double
+xMin = -2.0
 
-rescale :: Int -> Range -> Range -> Float
-rescale x (Range a b) (Range c d) = (fromIntegral x) * abs(d - c) / abs(b - a) + c
+xMax :: Double
+xMax = 2.0
 
-pointToComplex :: Point -> Int -> Int -> Range -> Range -> Complex
-pointToComplex (Point x y) h w rangeX rangeY = C re im
+yMin :: Double
+yMin = -2.0
+
+yMax :: Double
+yMax = 2.0
+
+maxIter :: Int
+maxIter = 255
+
+
+multiply :: Complex -> Complex -> Complex 
+multiply (Complex a b) (Complex c d) = Complex (a * c - d * b) (a * d + b * c)
+
+add :: Complex -> Complex  -> Complex 
+add (Complex a b) (Complex c d) = Complex (a + c) (b + d) -- just like vectors
+
+magnitude ::  Complex -> Double
+magnitude (Complex a b) = sqrt (a * a + b * b) -- vectors again!
+
+rescale :: Double -> Range -> Range -> Double
+rescale x (Range a b) (Range c d) = x * abs(d - c) / abs(b - a) + c
+
+pointToComplex :: Point -> Complex
+pointToComplex (Point x y) = Complex re im
     where
-        re = rescale x (Range 0 (fromIntegral w)) rangeX
-        im = rescale y (Range 0 (fromIntegral h)) rangeY
+        re = rescale (fromIntegral x) (Range 0.0 width) (Range xMin xMax)
+        im = rescale (fromIntegral y) (Range 0.0 height) (Range yMin yMax)
 
-mandelbrot :: Int -> Complex -> Complex
+mandelbrot :: Int -> Complex -> Complex 
 mandelbrot 0 c = c
-mandelbrot n c = (multiply z z) `add` c
+mandelbrot n c = add (multiply z z) c
         where z = mandelbrot (n-1) c
 
 -- fsharp style
@@ -39,30 +59,17 @@ countIterations :: Complex -> Int
 countIterations c =
    [1..]
    |> map (\n -> (n, magnitude $ mandelbrot n c))
-   |> filter (\(n, res) -> res > 2.0 || n > 255) -- 255 is max iterations
-   |> take 1 -- or (fst . head . take 1)
-   |> head 
-   |> fst
-    
-   
-   
-xRange :: Range
-xRange = Range (-2.0) 2.0
+   |> filter (\(n, res) -> res > 2.0 || n > maxIter)
+   |> head
+   |> fst 
 
-yRange :: Range
-yRange = Range (-2.0) 2.0
 
-width :: Int
-width = 120
 
-height :: Int
-height = 80
- 
-xyPairs :: [[(Int,Int)]]
-xyPairs = [ [(x, y) | x <- [1..width]] |  y <- [0..height]]
+points :: [[Point]]
+points = [[Point x y | x <- [1..(floor width)]] |  y <- [0..(floor height)]]
 
 iterations :: [[Int]]
-iterations = map (\pairs -> map (\(x,y) -> countIterations (pointToComplex (Point x y) height width xRange yRange)) pairs) xyPairs
+iterations = map (\pointRow -> map (countIterations . pointToComplex) pointRow) points  
 
 main :: IO()
 main = do
