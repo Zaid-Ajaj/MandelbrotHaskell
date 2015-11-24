@@ -41,10 +41,10 @@ rescale :: Double -> Range -> Range -> Double
 rescale x (Range a b) (Range c d) = x * abs(d - c) / abs(b - a) + c
 
 pointToComplex :: Point -> Complex
-pointToComplex (Point x y) = Complex re im
+pointToComplex (Point x y) = Complex x' y' 
     where
-        re = rescale (fromIntegral x) (Range 0.0 width) (Range xMin xMax)
-        im = rescale (fromIntegral y) (Range 0.0 height) (Range yMin yMax)
+        x' = rescale (fromIntegral x) (Range 0.0 width) (Range xMin xMax)
+        y' = rescale (fromIntegral y) (Range 0.0 height) (Range yMin yMax)
 
 mandelbrot :: Int -> Complex -> Complex 
 mandelbrot 0 c = c
@@ -60,16 +60,16 @@ countIterations c =
    [1..]
    |> map (\n -> (n, magnitude $ mandelbrot n c))
    |> filter (\(n, res) -> res > 2.0 || n > maxIter)
-   |> head
-   |> fst 
-
+   |> (fst . head)
 
 
 points :: [[Point]]
-points = [[Point x y | x <- [1..(floor width)]] |  y <- [0..(floor height)]]
+points = [[Point x y | x <- [0..(floor width)]] |  y <- [0..(floor height)]]
+    
 
 iterations :: [[Int]]
-iterations = map (\pointRow -> map (countIterations . pointToComplex) pointRow) points  
+iterations = map (map (countIterations . pointToComplex)) points  
+    
 
 main :: IO()
 main = do
