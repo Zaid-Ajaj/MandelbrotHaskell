@@ -4,7 +4,7 @@ import Control.Monad
 
 data Complex = Complex Double Double
 data Point = Point Integer Integer
-data Range = Range Double Double
+data Interval = Interval Double Double
 
 width :: Double
 width = 100.0
@@ -28,25 +28,25 @@ maxIter :: Int
 maxIter = 255
 
 
-multiply :: Complex -> Complex -> Complex 
+multiply :: Complex -> Complex -> Complex
 multiply (Complex a b) (Complex c d) = Complex (a * c - d * b) (a * d + b * c)
 
-add :: Complex -> Complex  -> Complex 
+add :: Complex -> Complex  -> Complex
 add (Complex a b) (Complex c d) = Complex (a + c) (b + d) -- just like vectors
 
 magnitude ::  Complex -> Double
 magnitude (Complex a b) = sqrt (a * a + b * b) -- vectors again!
 
-rescale :: Double -> Range -> Range -> Double
-rescale x (Range a b) (Range c d) = x * abs(d - c) / abs(b - a) + c
+rescale :: Double -> Interval -> Interval -> Double
+rescale x (Interval a b) (Interval c d) = x * abs(d - c) / abs(b - a) + c
 
 pointToComplex :: Point -> Complex
-pointToComplex (Point x y) = Complex x' y' 
+pointToComplex (Point x y) = Complex x' y'
     where
-        x' = rescale (fromIntegral x) (Range 0.0 width) (Range xMin xMax)
-        y' = rescale (fromIntegral y) (Range 0.0 height) (Range yMin yMax)
+        x' = rescale (fromIntegral x) (Interval 0.0 width) (Interval xMin xMax)
+        y' = rescale (fromIntegral y) (Interval 0.0 height) (Interval yMin yMax)
 
-mandelbrot :: Int -> Complex -> Complex 
+mandelbrot :: Int -> Complex -> Complex
 mandelbrot 0 c = c
 mandelbrot n c = add (multiply z z) c
         where z = mandelbrot (n-1) c
@@ -65,11 +65,11 @@ countIterations c =
 
 points :: [[Point]]
 points = [[Point x y | x <- [0..(floor width)]] |  y <- [0..(floor height)]]
-    
+
 
 iterations :: [[Int]]
-iterations = map (map (countIterations . pointToComplex)) points  
-    
+iterations = map (map (countIterations . pointToComplex)) points
+
 
 main :: IO()
 main = do
