@@ -37,6 +37,7 @@ add (Complex a b) (Complex c d) = Complex (a + c) (b + d) -- just like vectors
 magnitude ::  Complex -> Double
 magnitude (Complex a b) = sqrt (a * a + b * b) -- vectors again!
 
+-- takes a number x from interval [a, b] and projects it onto interval [c, d]
 rescale :: Double -> Interval -> Interval -> Double
 rescale x (Interval a b) (Interval c d) = x * abs(d - c) / abs(b - a) + c
 
